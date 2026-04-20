@@ -1,4 +1,4 @@
-# EMBEDDEED-C-SCHOOL-WORK
+# EMBEDDEED-C-SCHOOL-WORK BY APL
 ### Robotics & Engineering | FRDM-KL25Z
 
 This repository contains my laboratory work and embedded systems projects developed in C/C++.
