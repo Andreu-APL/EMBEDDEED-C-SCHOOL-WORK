@@ -1,0 +1,10 @@
+# Build Artifacts
+**/armgcc/out/
+**/armgcc/CMakeFiles/
+**/armgcc/CMakeCache.txt
+**/armgcc/*.elf
+**/armgcc/*.bin
+**/armgcc/*.map
+
+# macOS system files
+.DS_Store
