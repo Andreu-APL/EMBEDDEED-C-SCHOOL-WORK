@@ -1,0 +1,15 @@
+# Ignore build artifacts
+armgcc/out/
+armgcc/CMakeFiles/
+armgcc/CMakeCache.txt
+armgcc/Makefile
+armgcc/cmake_install.cmake
+armgcc/*.elf
+armgcc/*.bin
+armgcc/*.map
+
+# Ignore macOS system files
+.DS_Store
+
+# Ignore VS Code local settings (optional)
+.vscode/

@@ -1,0 +1,16 @@
+# ninja log v7
+1	86	1776697668082294271	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/gcc/startup_MKL25Z4.S.obj	ba6c00f2d7dba8de
+2	107	1776697668083254405	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/led_blinker/pin_mux.c.obj	2245c1d195e69645
+2	108	1776697668083588784	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_common.c.obj	c5b98b9e50e25048
+3	108	1776697668084425792	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/led_blinker/clock_config.c.obj	a2cef7392f7a2e6b
+2	109	1776697668083102820	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/led_blinker/led_blinker.c.obj	87922837c950e393
+3	110	1776697668083894912	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/system_MKL25Z4.c.obj	662fdf0ffaedf3b4
+2	110	1776697668083440157	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/led_blinker/board.c.obj	b9defc89aea6f681
+4	111	1776697668084823004	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_smc.c.obj	a94828713ed9b15c
+3	112	1776697668084109164	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_gpio.c.obj	28bb42eb30927588
+2	126	1776697668082720817	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_lpsci.c.obj	e88457bb32376320
+2	126	1776697668082937069	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_uart.c.obj	52586b34221a7a1e
+3	127	1776697668083744202	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/utilities/fsl_debug_console.c.obj	ee2f9c95a449a66f
+87	152	1776697668167807876	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_flash.c.obj	e9af436597c5a71c
+107	162	1776697668188131954	CMakeFiles/led_blinker.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_clock.c.obj	2a66a860cddbae63
+2	116	1776697794834071790	release/led_blinker.elf	fce79dbeeeb51490

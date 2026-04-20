@@ -1,0 +1,16 @@
+# ninja log v7
+0	1125	1776695891556302423	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/gcc/startup_MKL25Z4.S.obj	debddf098bed58b1
+2	1151	1776695891558003054	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/system_MKL25Z4.c.obj	f1d8e528827be44b
+2	1158	1776695891557708628	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_common.c.obj	a3f5e8d3a119392f
+3	1184	1776695891558306853	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/tpm_delay/clock_config.c.obj	776a18ac3cd9786d
+1126	1201	1776695892681774858	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_flash.c.obj	9311696bf1c0cf4d
+1151	1218	1776695892707130228	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_clock.c.obj	fe3c640268adc904
+1	1221	1776695891556699601	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_lpsci.c.obj	bce97c0616f6597a
+1	1256	1776695891556982150	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_uart.c.obj	39a8206903f22cac
+3	1287	1776695891558460816	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_smc.c.obj	698af7217f3dcb60
+2	1330	1776695891558155349	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_gpio.c.obj	6c53e8130d9a3e1c
+2	1378	1776695891557369119	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/tpm_delay/pin_mux.c.obj	b7a4b3566cde446c
+2	1443	1776695891557851591	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/utilities/fsl_debug_console.c.obj	cff733178dc9343b
+1	1474	1776695891557179322	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/tpm_delay/tpm_delay.c.obj	61c71fb52119e0d5
+2	1527	1776695891557555374	CMakeFiles/tpm_delay.elf.dir/Users/andre_apl/Coding/KL25Z/PRACS/tpm_delay/board.c.obj	24f02e833639eb8
+1527	3104	1776695893082924321	release/tpm_delay.elf	a6f6103c555d15b4
