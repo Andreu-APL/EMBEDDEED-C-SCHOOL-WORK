@@ -1,7 +1,7 @@
 INCLUDE(CMakeForceCompiler)
 SET(CMAKE_SYSTEM_NAME Generic)
 CMAKE_MINIMUM_REQUIRED (VERSION 3.13)
-project(robotsito C CXX ASM)
+project(3.LCD_Keyboard_Timers C CXX ASM)
 
 # Absolute Path to your SDK
 SET(SDK_DIR "/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z")
@@ -31,14 +31,14 @@ include_directories(${SDK_DIR}/devices/MKL25Z4/utilities)
 include_directories(${SDK_DIR}/devices/MKL25Z4)
 
 # --- EXECUTABLE TARGET ---
-add_executable(robotsito.elf 
+add_executable(3.LCD_Keyboard_Timers.elf 
 "${SDK_DIR}/devices/MKL25Z4/gcc/startup_MKL25Z4.S"
 "${SDK_DIR}/devices/MKL25Z4/drivers/fsl_lpsci.h"
 "${SDK_DIR}/devices/MKL25Z4/drivers/fsl_lpsci.c"
 "${SDK_DIR}/devices/MKL25Z4/drivers/fsl_uart.h"
 "${SDK_DIR}/devices/MKL25Z4/drivers/fsl_uart.c"
 "${SDK_DIR}/devices/MKL25Z4/drivers/fsl_port.h"
-"${ProjDirPath}/../robotsito.c" 
+"${ProjDirPath}/../3.LCD_Keyboard_Timers.c" 
 "${ProjDirPath}/../pin_mux.c"
 "${ProjDirPath}/../pin_mux.h"
 "${ProjDirPath}/../board.c"
@@ -66,13 +66,13 @@ set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${SDK_DIR}/d
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -T${SDK_DIR}/devices/MKL25Z4/gcc/MKL25Z128xxx4_flash.ld -static")
 
 # --- LINK LIBRARIES ---
-TARGET_LINK_LIBRARIES(robotsito.elf -Wl,--start-group)
-target_link_libraries(robotsito.elf debug m)
-target_link_libraries(robotsito.elf debug c)
-target_link_libraries(robotsito.elf debug gcc)
-target_link_libraries(robotsito.elf debug nosys)
-target_link_libraries(robotsito.elf optimized m)
-target_link_libraries(robotsito.elf optimized c)
-target_link_libraries(robotsito.elf optimized gcc)
-target_link_libraries(robotsito.elf optimized nosys)
-TARGET_LINK_LIBRARIES(robotsito.elf -Wl,--end-group)
+TARGET_LINK_LIBRARIES(3.LCD_Keyboard_Timers.elf -Wl,--start-group)
+target_link_libraries(3.LCD_Keyboard_Timers.elf debug m)
+target_link_libraries(3.LCD_Keyboard_Timers.elf debug c)
+target_link_libraries(3.LCD_Keyboard_Timers.elf debug gcc)
+target_link_libraries(3.LCD_Keyboard_Timers.elf debug nosys)
+target_link_libraries(3.LCD_Keyboard_Timers.elf optimized m)
+target_link_libraries(3.LCD_Keyboard_Timers.elf optimized c)
+target_link_libraries(3.LCD_Keyboard_Timers.elf optimized gcc)
+target_link_libraries(3.LCD_Keyboard_Timers.elf optimized nosys)
+TARGET_LINK_LIBRARIES(3.LCD_Keyboard_Timers.elf -Wl,--end-group)
