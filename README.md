@@ -13,5 +13,5 @@ This repository contains my laboratory work and embedded systems projects develo
 - **Flashing:** OpenOCD / pyOCD
 - **Editor:** Neovim / VS Code
 
-<img src="Sackboy/CSACK.jpg" alt="Repo Sackboy" width="400">
+<img src="Sackboy/CSACK.jpg" alt="Repo Sackboy" width="200">
 
