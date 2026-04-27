@@ -1,0 +1,14 @@
+# ninja log v7
+1	33	1777250623595259313	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/gcc/startup_MKL25Z4.S.obj	2b22c2d23ec36ec0
+3	55	1777250623597049949	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/system_MKL25Z4.c.obj	f61554d4d082226c
+3	56	1777250623597403868	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_gpio.c.obj	c38038fd81f955e8
+3	57	1777250623597734662	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/EMBEDDEED-C-SCHOOL-WORK/PRACS/4.LCD-Keyboard-Timers-Interrupts/clock_config.c.obj	5699481f9e4faa1
+2	57	1777250623596086443	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/EMBEDDEED-C-SCHOOL-WORK/PRACS/4.LCD-Keyboard-Timers-Interrupts/pin_mux.c.obj	60608bc90b4e8468
+4	57	1777250623598278332	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_smc.c.obj	afd3a27e46b555a
+2	57	1777250623596383112	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/EMBEDDEED-C-SCHOOL-WORK/PRACS/4.LCD-Keyboard-Timers-Interrupts/board.c.obj	4e0832cd1d4fc166
+2	58	1777250623596560571	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_common.c.obj	7866a60917a60d8e
+2	63	1777250623596714072	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/utilities/fsl_debug_console.c.obj	82b90344c99a0c05
+1	66	1777250623595780733	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_uart.c.obj	e71c44cbe7932a43
+1	67	1777250623595587690	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_lpsci.c.obj	67fd5b24dcc4d298
+33	89	1777250623627390676	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_flash.c.obj	5ab3dfd898d1524e
+55	97	1777250623649418727	CMakeFiles/4.LCD_Keyboard_Timers.elf.dir/Users/andre_apl/Coding/KL25Z/SDK_2_2_0_FRDM-KL25Z/devices/MKL25Z4/drivers/fsl_clock.c.obj	cd7a88986ba90767
