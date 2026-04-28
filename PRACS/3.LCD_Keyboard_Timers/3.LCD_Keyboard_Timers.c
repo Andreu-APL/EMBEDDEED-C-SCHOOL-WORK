@@ -1,362 +1,354 @@
+/*
+ * Prac3 Timer using Keypad, LCD and TPM0
+
+ *
+ * This program implements a timer where the user inputs a number
+ * of seconds using a 4x4 keypad. The value is displayed on an LCD
+ * and the timer starts when '*' is pressed.
+ *
+ * TPM0 is used to generate 1-second interrupts, incrementing a
+ * counter that is shown on the LCD in real time.
+ */
+
 #include <MKL25Z4.h>
-#include "board.h"
-#include "pin_mux.h"
-#include "clock_config.h"
-#include "fsl_debug_console.h"
+#include <stdio.h>
 
-/* LCD Pin Definitions (PORTC) */
-#define LCD_RS_PIN 0U
-#define LCD_EN_PIN 1U
-#define LCD_D4_PIN 2U
-#define LCD_D5_PIN 3U
-#define LCD_D6_PIN 4U
-#define LCD_D7_PIN 5U
+// --- Function Declarations ---
+void delayMs(int n);
+void delayUs(int n);
 
-/* Keyboard Pin Definitions */
-/* Rows as outputs (PORTE) */
-#define KBD_ROW1_PIN 20U
-#define KBD_ROW2_PIN 21U
-#define KBD_ROW3_PIN 22U
-#define KBD_ROW4_PIN 23U
-/* Cols as inputs (PORTE/PORTB) */
-#define KBD_COL1_PIN 29U // PORTE
-#define KBD_COL2_PIN 30U // PORTE
-#define KBD_COL3_PIN 0U  // PORTB
-#define KBD_COL4_PIN 1U  // PORTB
+void keypad_init(void);
+unsigned char keypad_getkey(void);
 
-/**
- *Software-based delay in milliseconds.
- * Uses a simple NOP loop calibrated for the KL25Z core clock.
- * ms Number of milliseconds to wait.
- */
-void delay_ms(uint32_t ms) {
-    uint32_t i;
-    for (i = 0; i < ms * 7000; i++) {
-        __NOP();
-    }
+void LED_init(void);
+void LED_set(int value);
+
+void LCD_init(void);
+void LCD_byte(unsigned char data);
+void LCD_command(unsigned char command);
+void LCD_data(unsigned char data);
+void LCD_sendstring(char *str);
+
+//TIMER
+void TPM0_init(void);
+
+
+#define RS 0x04
+#define RW 0x10
+#define EN 0x20
+
+char buffer[5];
+int index= 0;
+int segundos= 0;
+int contador= 0;
+int running= 0;
+
+int main(void)
+{
+    unsigned char key;
+    unsigned char last_key = 255;
+
+    //initialization
+    keypad_init();
+    LED_init();
+    LCD_init();
+
+    LCD_command(0x01); // Clear screen
+    delayMs(2);
+    LCD_command(0x80); // Move cursor to line 1
+    LCD_sendstring("Hello");
+    delayMs(5000);
+
+    LCD_command(0x01);
+    LCD_command(0x80);
+    LCD_sendstring("Cuantos seg: ");
+    LCD_command(0xC0); // Move cursor to line 2
+
+
+    for(;;)
+    {
+        key = keypad_getkey();
+
+        // If no key is pressed, reset the last_key state so we can press the same key twice
+        if (key == 255)
+        {
+            last_key = 255;
+        }
+        // If a valid key is pressed and it's a new press (not held down)
+        else if (key != last_key)
+        {
+            last_key = key;
+
+            if (key <= 9)
+            {
+            	if (index < 4)
+            	{
+            		 buffer[index++] = key + '0';
+            		 buffer[index] = '\0';
+            		 LCD_command(0xC0);
+            		 LCD_sendstring("                ");
+            		 LCD_command(0xC0);
+            		 LCD_sendstring(buffer);
+            	}
+
+            }
+            // Confirmar con *
+            else if (key == 14)
+            {
+               segundos = atoi(buffer);
+               index = 0;
+               contador = 0;
+               running = 1;
+               LCD_command(0x01);
+               LCD_command(0x80);
+               LCD_sendstring("Counting...");
+             }
+          }
+        // Mostrar conteo
+          if (running)
+          {
+              char temp[16];
+              sprintf(temp, "t=%d/%d", contador, segundos);
+              LCD_command(0xC0);
+              LCD_sendstring("                ");
+              LCD_command(0xC0);
+              LCD_sendstring(temp);
+
+              delayMs(200);
+
+              if (contador >= segundos)
+              {
+                  running = 0;
+
+                  LCD_command(0x01);
+                  LCD_sendstring("FIN!");
+
+                  LED_set(1);
+                 }
+              }
+          }
+      }
+
+
+
+void keypad_init(void)
+{
+    SIM->SCGC5 |= 0x0800;
+    PORTC->PCR[0] = 0x103;
+    PORTC->PCR[1] = 0x103;
+    PORTC->PCR[2] = 0x103;
+    PORTC->PCR[3] = 0x103;
+    PORTC->PCR[4] = 0x103;
+    PORTC->PCR[5] = 0x103;
+    PORTC->PCR[6] = 0x103;
+    PORTC->PCR[7] = 0x103;
+    PTC->PDDR = 0x0F;
 }
 
-/**
- * Sends a 4-bit to the LCD.
- * Sets the RS pin based on input and toggles the EN pin to latch data.
- * nibble The 4 bits of data to send (lower 4 bits).
- * rs Register Select: 0 for Command, 1 for Data.
- */
-void LCD_Nibble(uint8_t nibble, uint8_t rs) {
-    if (rs) {
-        PTC->PSOR = (1U << LCD_RS_PIN);
-    } else {
-        PTC->PCOR = (1U << LCD_RS_PIN);
-    }
-    
-    PTC->PCOR = (0x0F << LCD_D4_PIN); // Clear data pins
-    PTC->PSOR = ((nibble & 0x0F) << LCD_D4_PIN); // Set data pins
-    
-    PTC->PSOR = (1U << LCD_EN_PIN);
-    __NOP();
-    PTC->PCOR = (1U << LCD_EN_PIN);
-    delay_ms(1);
-}
+unsigned char keypad_getkey(void)
+{
+    int row, col;
+    const char row_select[] = {0x01, 0x02, 0x04, 0x08};
 
-/**
- * Sends an 8-bit command to the LCD in 4-bit mode.
- * Splits the command into high and low nibbles.
- * cmd The command byte to send.
- */
-void LCD_Command(uint8_t cmd) {
-    LCD_Nibble(cmd >> 4, 0);
-    LCD_Nibble(cmd & 0x0F, 0);
-}
-
-/**
- * Sends an 8-bit character data to the LCD.
- * Splits the data into high and low nibbles.
- * data The character byte to display.
- */
-void LCD_Data(uint8_t data) {
-    LCD_Nibble(data >> 4, 1);
-    LCD_Nibble(data & 0x0F, 1);
-}
-
-/**
- * Initializes the LCD in 4-bit mode.
- * Configures PORTC pins as GPIO, sets data direction, and performs the
- * power-on initialization sequence for the HD44780 controller.
- */
-void LCD_Init(void) {
-    SIM->SCGC5 |= SIM_SCGC5_PORTC_MASK;
-    PORTC->PCR[LCD_RS_PIN] = PORT_PCR_MUX(1);
-    PORTC->PCR[LCD_EN_PIN] = PORT_PCR_MUX(1);
-    PORTC->PCR[LCD_D4_PIN] = PORT_PCR_MUX(1);
-    PORTC->PCR[LCD_D5_PIN] = PORT_PCR_MUX(1);
-    PORTC->PCR[LCD_D6_PIN] = PORT_PCR_MUX(1);
-    PORTC->PCR[LCD_D7_PIN] = PORT_PCR_MUX(1);
-    
-    PTC->PDDR |= (1U << LCD_RS_PIN) | (1U << LCD_EN_PIN) | (0x0F << LCD_D4_PIN);
-    
-    delay_ms(20);
-    LCD_Nibble(0x03, 0);
-    delay_ms(5);
-    LCD_Nibble(0x03, 0);
-    delay_ms(1);
-    LCD_Nibble(0x03, 0);
-    LCD_Nibble(0x02, 0); // 4-bit mode
-    
-    LCD_Command(0x28); // 2 lines, 5x7
-    LCD_Command(0x0C); // Display ON, Cursor OFF
-    LCD_Command(0x06); // Auto-increment
-    LCD_Command(0x01); // Clear
-    delay_ms(2);
-}
-
-/**
- * Displays a null-terminated string on the LCD.
- * str Pointer to the character array.
- */
-void LCD_String(char* str) {
-    while (*str) {
-        LCD_Data(*str++);
-    }
-}
-
-/**
- * Sets the cursor position on the LCD grid.
- * row Row index (0 or 1).
- * col Column index (0 to 15).
- */
-void LCD_SetCursor(uint8_t row, uint8_t col) {
-    uint8_t addr = (row == 0) ? 0x00 : 0x40;
-    LCD_Command(0x80 | (addr + col));
-}
-
-/**
- * Initializes the 4x4 Matrix Keyboard.
- * Configures Rows as GPIO outputs (driving HIGH) and Columns as
- * GPIO inputs with internal pull-up resistors.
- */
-void KBD_Init(void) {
-    SIM->SCGC5 |= SIM_SCGC5_PORTB_MASK | SIM_SCGC5_PORTE_MASK;
-    
-    // Rows as GPIO Output
-    PORTE->PCR[KBD_ROW1_PIN] = PORT_PCR_MUX(1);
-    PORTE->PCR[KBD_ROW2_PIN] = PORT_PCR_MUX(1);
-    PORTE->PCR[KBD_ROW3_PIN] = PORT_PCR_MUX(1);
-    PORTE->PCR[KBD_ROW4_PIN] = PORT_PCR_MUX(1);
-    PTE->PDDR |= (1U << KBD_ROW1_PIN) | (1U << KBD_ROW2_PIN) | (1U << KBD_ROW3_PIN) | (1U << KBD_ROW4_PIN);
-    PTE->PSOR = (1U << KBD_ROW1_PIN) | (1U << KBD_ROW2_PIN) | (1U << KBD_ROW3_PIN) | (1U << KBD_ROW4_PIN);
-
-    // Cols as GPIO Input with Pull-up
-    PORTE->PCR[KBD_COL1_PIN] = PORT_PCR_MUX(1) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
-    PORTE->PCR[KBD_COL2_PIN] = PORT_PCR_MUX(1) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
-    PORTB->PCR[KBD_COL3_PIN] = PORT_PCR_MUX(1) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
-    PORTB->PCR[KBD_COL4_PIN] = PORT_PCR_MUX(1) | PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;
-    PTE->PDDR &= ~((1U << KBD_COL1_PIN) | (1U << KBD_COL2_PIN));
-    PTB->PDDR &= ~((1U << KBD_COL3_PIN) | (1U << KBD_COL4_PIN));
-}
-
-/**
- * Scans the keyboard for a single key press.
- * Iteratively drives each row LOW and checks for LOW signals on columns.
- * return ASCII character of the pressed key, or 0 if no key is pressed.
- */
-char KBD_GetKey(void) {
-    const char keys[4][4] = {
-        {'1', '2', '3', 'A'},
-        {'4', '5', '6', 'B'},
-        {'7', '8', '9', 'C'},
-        {'*', '0', '#', 'D'}
+    const unsigned char keypad_map[4][4] = {
+        {1,2,3,10},
+        {4,5,6,11},
+        {7,8,9,12},
+        {14,0,15,13}
     };
-    uint32_t row_pins[4] = {KBD_ROW1_PIN, KBD_ROW2_PIN, KBD_ROW3_PIN, KBD_ROW4_PIN};
-    
-    for (int r = 0; r < 4; r++) {
-        PTE->PCOR = (1U << row_pins[r]); // Drive row LOW
-        
-        delay_ms(5); // Debounce/Settle
-        
-        uint8_t c1 = !(PTE->PDIR & (1U << KBD_COL1_PIN));
-        uint8_t c2 = !(PTE->PDIR & (1U << KBD_COL2_PIN));
-        uint8_t c3 = !(PTB->PDIR & (1U << KBD_COL3_PIN));
-        uint8_t c4 = !(PTB->PDIR & (1U << KBD_COL4_PIN));
-        
-        PTE->PSOR = (1U << row_pins[r]); // Drive row HIGH back
-        
-        if (c1) return keys[r][0];
-        if (c2) return keys[r][1];
-        if (c3) return keys[r][2];
-        if (c4) return keys[r][3];
+
+    PTC->PDDR |= 0x0F;
+    PTC->PCOR = 0x0F;
+    delayUs(2);
+    col = PTC->PDIR & 0xF0;
+    PTC->PDDR = 0;
+    if (col == 0xF0) return 255;
+
+    for (row = 0; row < 4; row++)
+    {
+        PTC->PDDR = 0;
+        PTC->PDDR |= row_select[row];
+        PTC->PCOR = row_select[row];
+
+        delayUs(2);
+        col = PTC->PDIR & 0xF0;
+
+        if (col != 0xF0) break;
     }
-    return 0;
+
+    PTC->PDDR = 0;
+
+    if (row == 4) return 255;
+
+    if (col == 0xE0) return keypad_map[row][0];
+    if (col == 0xD0) return keypad_map[row][1];
+    if (col == 0xB0) return keypad_map[row][2];
+    if (col == 0x70) return keypad_map[row][3];
+
+    return 255;
 }
 
-/**
- * Blocking function that waits for a key press and release.
- * Includes a small debounce delay.
- * return ASCII character of the pressed key.
- */
-char KBD_WaitKey(void) {
-    char key = 0;
-    while (!(key = KBD_GetKey()));
-    delay_ms(200); // Debounce
-    while (KBD_GetKey()); // Wait for release
-    return key;
+// ==================
+// RGB LED FUNCTIONS
+// ==================
+void LED_init(void)
+{
+    SIM->SCGC5 |= 0x400;  // Port B
+    SIM->SCGC5 |= 0x1000; // Port D
+
+    PORTB->PCR[18] = 0x100;
+    PTB->PDDR |= 0x40000;
+    PTB->PSOR |= 0x40000;
+
+    PORTB->PCR[19] = 0x100;
+    PTB->PDDR |= 0x80000;
+    PTB->PSOR |= 0x80000;
+
+    PORTD->PCR[1] = 0x100;
+    PTD->PDDR |= 0x02;
+    PTD->PSOR |= 0x02;
 }
 
-/**
- * Simple Integer to ASCII conversion.
- * Converts positive integers to a null-terminated string.
- * val Integer value to convert.
- * str Destination character buffer.
- */
-void my_itoa(int val, char* str) {
-    if (val == 0) {
-        str[0] = '0';
-        str[1] = '\0';
-        return;
+void LED_set(int value)
+{
+    PTB->PSOR = 0x40000;
+    PTB->PSOR = 0x80000;
+    PTD->PSOR = 0x02;
+
+    switch(value)
+    {
+        case 1: PTB->PCOR = 0x40000; break;
+        case 2: PTB->PCOR = 0x80000; break;
+        case 3: PTB->PCOR = 0x40000; PTB->PCOR = 0x80000; break;
+        case 4: PTD->PCOR = 0x02; break;
+        case 5: PTB->PCOR = 0x40000; PTD->PCOR = 0x02; break;
+        case 6: PTB->PCOR = 0x80000; PTD->PCOR = 0x02; break;
+        case 7: PTB->PCOR = 0x40000; PTB->PCOR = 0x80000; PTD->PCOR = 0x02; break;
+        default: break;
     }
-    int i = 0;
-    char tmp[10];
-    while (val > 0) {
-        tmp[i++] = (val % 10) + '0';
-        val /= 10;
-    }
-    int j = 0;
-    while (i > 0) {
-        str[j++] = tmp[--i];
-    }
-    str[j] = '\0';
+}
+// ===============
+// LCD FUNCTIONS (4-BIT MODE)
+// ===============
+void LCD_init(void)
+{
+    SIM->SCGC5 |= 0x1000; // Port D for Data (PTD4-PTD7)
+    PORTD->PCR[0] = 0x100;
+    PORTD->PCR[1] = 0x100;
+    PORTD->PCR[2] = 0x100;
+    PORTD->PCR[3] = 0x100;
+    PORTD->PCR[4] = 0x100;
+    PORTD->PCR[5] = 0x100;
+    PORTD->PCR[6] = 0x100;
+    PORTD->PCR[7] = 0x100;
+    PTD->PDDR |= 0xFF; // all as outputs
+
+    SIM->SCGC5 |= 0x0200; // Port A for Control (PTA2, PTA4, PTA5)
+    PORTA->PCR[2] = 0x100;
+    PORTA->PCR[4] = 0x100;
+    PORTA->PCR[5] = 0x100;
+    PTA->PDDR |= 0x34;
+
+    // 4-Bit Initialization Sequence
+    delayMs(30);
+    PTA->PCOR = RS | RW;
+
+    LCD_command(0x30);
+    delayMs(5);
+    LCD_command(0x30);
+    delayUs(150);
+    LCD_command(0x30);
+    delayUs(150);
+
+
+    LCD_command(0x38);
+    LCD_command(0x0C);
+    LCD_command(0x06);
+    LCD_command(0x01);
+    delayMs(2);
 }
 
-/**
- * Initializes TPM0 (Timer/PWM Module) for general timing.
- * Configures the TPM clock source and sets a prescaler of 128.
- */
-void Timer_Init(void) {
-    SIM->SCGC6 |= SIM_SCGC6_TPM0_MASK;
-    SIM->SOPT2 |= SIM_SOPT2_TPMSRC(1); // MCGFLLCLK or MCGPLLCLK/2 (typically 48MHz)
-    TPM0->SC = 0; // Disable
-    TPM0->SC = TPM_SC_PS(7); // Prescaler 128 -> 48MHz / 128 = 375,000 Hz
+void LCD_byte(unsigned char data)
+{
+    // Clear the top 4 bits of Port D without affecting the rest (like PTD1)
+    PTD->PCOR = 0xFF;
+    // Set the 8 bits of Port D according to the data
+    PTD->PSOR = (data);
+
+    // Pulse EN
+    PTA->PSOR = EN;
+    delayUs(50);
+    PTA->PCOR = EN;
+    delayUs(50);
 }
 
-/**
- * Main execution loop.
- * Orchestrates Part 1 (LED Menu) and Part 2 (Ascending Timer) logic.
- */
-int main(void) {
-    /* Initialize Board Hardware */
-    BOARD_InitPins();
-    BOARD_BootClockRUN();
-    BOARD_InitDebugConsole();
-    
-    /* Initialize Components */
-    LCD_Init();
-    KBD_Init();
-    Timer_Init();
-    
-    /* Initialize RGB LEDs */
-    LED_RED_INIT(LOGIC_LED_OFF);
-    LED_GREEN_INIT(LOGIC_LED_OFF);
-    LED_BLUE_INIT(LOGIC_LED_OFF);
+void LCD_command(unsigned char command)
+{
+    PTA->PCOR = RS | RW; // RS = 0, RW = 0
+    LCD_byte(command);        // Send all
 
-    PRINTF("System Initialized\r\n");
 
-    /* Part 2 Requirement: Print hello and stay for 5 seconds */
-    LCD_Command(0x01);
-    LCD_String("hello");
-    delay_ms(5000);
+    if (command < 4) delayMs(2);
+    else delayUs(50);
+}
 
-    while (1) {
-        /* Part 1: Menu and Output Management */
-        LCD_Command(0x01);
-        LCD_SetCursor(0, 0);
-        LCD_String("  PRESS BUTTON  ");
-        LCD_SetCursor(1, 0);
-        LCD_String("R: 1  B: 2  G: 3");
+void LCD_data(unsigned char data)
+{
+    PTA->PSOR = RS; // RS = 1
+    PTA->PCOR = RW; // RW = 0
 
-        char key = KBD_WaitKey();
-        
-        if (key == '1') {
-            /* Handle Red LED selection */
-            LCD_Command(0x01);
-            LCD_String("RED");
-            LCD_SetCursor(1, 0);
-            LCD_String("LED IS ON!");
-            LED_RED_ON();
-            delay_ms(3000);
-            LED_RED_OFF();
-        } else if (key == '2') {
-            /* Handle Blue LED selection */
-            LCD_Command(0x01);
-            LCD_String("BLUE");
-            LCD_SetCursor(1, 0);
-            LCD_String("LED IS ON!");
-            LED_BLUE_ON();
-            delay_ms(3000);
-            LED_BLUE_OFF();
-        } else if (key == '3') {
-            /* Handle Green LED selection */
-            LCD_Command(0x01);
-            LCD_String("GREEN");
-            LCD_SetCursor(1, 0);
-            LCD_String("LED IS ON!");
-            LED_GREEN_ON();
-            delay_ms(3000);
-            LED_GREEN_OFF();
-        } else if (key == '*') {
-            /* Part 2: Ascending Timer Implementation */
-            LCD_Command(0x01);
-            LCD_String("Seconds:");
-            LCD_SetCursor(1, 0);
-            
-            uint32_t val = 0;
-            char k;
-            /* Capture user numeric input */
-            while (1) {
-                k = KBD_WaitKey();
-                if (k >= '0' && k <= '9') {
-                    LCD_Data(k);
-                    val = val * 10 + (k - '0');
-                } else {
-                    // Stop input on non-numerical key (* or #)
-                    break;
-                }
-            }
-            
-            LCD_Command(0x01);
-            LCD_String("Counting");
-            
-            /* Perform countdown using TPM hardware */
-            for (int i = val; i >= 0; i--) {
-                LCD_SetCursor(1, 0);
-                char buf[10];
-                my_itoa(i, buf);
-                LCD_String(buf);
-                LCD_String("    "); // Clear trailing digits
-                
-                // Configure TPM for 1 second wait
-                TPM0->CNT = 0;
-                TPM0->MOD = 375000 - 1; // 1 second period at 375kHz
-                TPM0->SC |= TPM_SC_CMOD(1); // Start LPTPM counter
-                
-                // Poll the Timer Overflow Flag (TOF)
-                while (!(TPM0->SC & TPM_SC_TOF_MASK));
-                TPM0->SC |= TPM_SC_TOF_MASK; // Clear the TOF flag
-                TPM0->SC &= ~TPM_SC_CMOD(1); // Stop counter
-            }
-            
-            /* Finish Countdown */
-            LCD_SetCursor(1, 0);
-            LCD_String("ZERO!");
-            LED_RED_ON();
-            LED_GREEN_ON();
-            LED_BLUE_ON();
-            delay_ms(3000);
-            LED_RED_OFF();
-            LED_GREEN_OFF();
-            LED_BLUE_OFF();
+    LCD_byte(data);        // Send all
+
+    delayUs(50);
+}
+
+void LCD_sendstring(char *str)
+{
+    while (*str != '\0')
+    {
+        LCD_data(*str);
+        str++;
+    }
+}
+
+//TIMERS
+void TPM0_init(void)
+{
+    SIM->SCGC6 |= 0x01000000;
+    SIM->SOPT2 |= 0x01000000;
+
+    TPM0->SC = 0;
+    TPM0->SC = 0x07; // prescaler 128
+    TPM0->MOD = 375000; // 1 segundo aprox
+
+    TPM0->SC |= 0x40; // interrupcion
+    NVIC_EnableIRQ(TPM0_IRQn);
+}
+
+void TPM0_IRQHandler(void)
+{
+    TPM0->SC |= 0x80;
+
+    if (running)
+    {
+        contador++;
+    }
+}
+
+void delayUs(int n) {
+    volatile int i, j;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < 3; j++) {
+            __asm("nop");
         }
     }
-    return 0;
 }
 
-
-
+void delayMs(int n) {
+    volatile int i, j;
+    for(i = 0; i < n; i++) {
+        for(j = 0; j < 5000; j++) {
+            __asm("nop");
+        }
+    }
+}
